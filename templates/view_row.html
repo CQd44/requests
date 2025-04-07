@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head><title>View Ticket</title></head>
+<body>
+<style>
+	h1 {
+	text-align: center;
+	margin-top: 5%;
+	background-color: lightgray;
+	}
+	
+	body {
+		margin-left: 0;
+		display: grid;
+		min-height: 10vh;
+		place-items: justify left;
+		background-color: lightgray;
+	}
+
+	p {
+	margin-left: 30%
+	}
+	
+	.active {
+	text-align: center;
+	}
+	
+	div {
+	text-align: center;
+	}
+
+		</style>
+<h1>{{ticket_data.name}}'s Ticket Details</h1>
+	{% if ticket_data %}
+		<p><strong>ID:</strong> {{ticket_data.id}}</p>
+		<p><strong>Name:</strong> {{ticket_data.name}}</p>
+		<p><strong>Clinic / Location:</strong> {{ticket_data.clinic}}</p>
+		<p><strong>Issue:</strong> {{ticket_data.issue}}</p>
+		<p><strong>Date and time entered:</strong> {{ticket_data.entrydate}}</p>
+		<p><strong>Ticket still open?:</strong> {{ticket_data.open}}</p>
+		<p><strong>Remarks / Resolution:</strong> {{ticket_data.Remarks}}</p>
+	{% else %}
+		<p>Record not found.</p>
+	{% endif %}
+	<a href = "/" class = "active">Go back</a>
+</body>
+</html>

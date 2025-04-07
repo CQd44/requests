@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	body {
+		margin: 0;
+		display: grid;
+		min-height: 10vh;
+		place-items: center;
+		background-color: lightgray;
+	}
+	div {
+		text-align: center;
+	}
+	input[type="submit"] {
+	display: block;
+	margin: 0 auto;
+	}
+	input[type="text"] {
+	display: block;
+	margin: 0 auto;
+	}
+	textarea[name="response"] {
+	display: block;
+	margin: 0 auto;
+	}
+	input[type="number"] {
+	display: block;
+	margin: 0 auto;
+	}
+		</style>
+<title>Clay's Service Request Form</title></head>
+<body>
+    <h1>Clay's Service Request Form</h1>
+	<div></div>
+    <p>Please enter your name, your clinic, and what issue you are currently experiencing and I will help you as soon as possible.</p>
+	<form method="post" action="/submit">
+        <label>Name: <input type="text" name="name" required></label><br>
+		<label>Clinic: <input type="text" name="clinic"></label><br>
+        <label>Issue: <textarea name="response" required></textarea></label><br>
+        <input type="submit" value="Submit">
+    </form>
+	
+	<h1>View a ticket</h1>
+	<form method = "get" action = "/view">
+		<label>Enter ticket ID: <input type = "number" name = "id" required></label><br>
+		<input type = "submit" value="View ticket">
+</body>
+</html>
+
+
