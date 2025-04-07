@@ -93,7 +93,9 @@ async def thank_you(request: Request, id: int = None):
 async def view_ticket(request: Request, id: int):
     con = psycopg2.connect(f'dbname = {CONFIG['credentials']['dbname']} user = {CONFIG['credentials']['username']} password = {CONFIG['credentials']['password']}')
     cur = con.cursor()
-    cur.execute(f"SELECT * FROM responses WHERE id = {id}")
+    SQL = "SELECT * FROM responses WHERE id = (%s);"
+    DATA = id
+    cur.execute(SQL, (DATA,)
     
     result = cur.fetchone()
     cur.close()
