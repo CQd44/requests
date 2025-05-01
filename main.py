@@ -3,16 +3,16 @@
 #Additionally, it enables me to better keep track of what issues I fix and what remarks I may have made about the repair.
 #I have also created a rudimentary report generator that will spit out everything in the database into a CSV.
 #Written by Clay Young
-
+#william.youngiv@dhr-rgv.com
+#Extension x21965
 
 from fastapi import FastAPI, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 import psycopg2
-import easygui
 import smtplib
 import toml
-
+import socket
 
 CONFIG = toml.load("./config.toml") #load variables from toml file
 app = FastAPI()
@@ -58,12 +58,22 @@ def init_db():
                     Name TEXT,
                     Clinic TEXT, 
                     Issue TEXT,
-                    EntryDate TIMESTAMPTZ DEFAULT Now(),
+                    EntryDate TIMESTAMP DEFAULT Now(),
                     Open BOOL DEFAULT True,
-                    Remarks TEXT)'''
+                    Remarks TEXT,
+                    ip_addr INET,
+                    hostname TEXT)'''
                 )
         cur.close()
         con.commit()
+
+#function to get hostname for better tracking
+def get_hostname(ip_address):
+    try:
+        hostname = socket.gethostbyaddr(ip_address)[0]
+        return hostname
+    except socket.herror:
+        return "No hostname found"
 
 # Home page with the form
 @app.get("/", response_class=HTMLResponse)
@@ -72,10 +82,12 @@ async def get_form(request: Request):
 
 # Handle form submission
 @app.post("/submit")
-async def submit_form(name: str = Form(...), clinic: str = Form(...), response: str = Form(...)):
+async def submit_form(request: Request, name: str = Form(...), clinic: str = Form(...), response: str = Form(...)):
+    client_ip = request.client.host
+    hostname = get_hostname(client_ip)
     con = psycopg2.connect(f'dbname = {CONFIG['credentials']['dbname']} user = {CONFIG['credentials']['username']} password = {CONFIG['credentials']['password']}')
     cur = con.cursor()
-    cur.execute("INSERT INTO responses (Name, Clinic, Issue) VALUES (%s, %s, %s)", (name.strip(), clinic.strip(), response.strip()))    
+    cur.execute("INSERT INTO responses (Name, Clinic, Issue, ip_addr, hostname) VALUES (%s, %s, %s, %s, %s)", (name.strip(), clinic.strip(), response.strip(), client_ip, hostname))    
     cur.execute("SELECT id FROM responses ORDER BY id DESC LIMIT 1")
     new_id = cur.fetchone()[0]
     cur.close()
@@ -95,7 +107,7 @@ async def view_ticket(request: Request, id: int):
     cur = con.cursor()
     SQL = "SELECT * FROM responses WHERE id = (%s);"
     DATA = id
-    cur.execute(SQL, (DATA,)
+    cur.execute(SQL, (DATA,))
     
     result = cur.fetchone()
     cur.close()
