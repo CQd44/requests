@@ -124,4 +124,4 @@ async def startup_event():
     try:
         init_db()
     except Exception as e:
-        print("Table already exists")
+        print(e)
