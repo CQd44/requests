@@ -1,7 +1,6 @@
 import csv
 import psycopg2
 import easygui #might implement more functionality later and I like easygui :)
-from icecream import ic
 import toml
 
 CONFIG = toml.load("./config.toml") #load configuration variables from toml file
