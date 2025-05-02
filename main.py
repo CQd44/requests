@@ -44,28 +44,19 @@ Issue: {issue}
 def init_db():
     con = psycopg2.connect(f'dbname = {CONFIG['credentials']['dbname']} user = {CONFIG['credentials']['username']} password = {CONFIG['credentials']['password']}')
     cur = con.cursor()
-    cur.execute("""SELECT EXISTS (
-                SELECT FROM information_schema.tables
-                WHERE table_name = 'responses'
-                );""")
-    responses_table_exists: bool = cur.fetchone()
-    print(responses_table_exists)
-    if responses_table_exists[0] == False: 
-        con = psycopg2.connect(f'dbname = {CONFIG['credentials']['dbname']} user = {CONFIG['credentials']['username']} password = {CONFIG['credentials']['password']}')
-        cur = con.cursor()
-        cur.execute('''CREATE TABLE responses 
-                    (id SERIAL PRIMARY KEY, 
-                    Name TEXT,
-                    Clinic TEXT, 
-                    Issue TEXT,
-                    EntryDate TIMESTAMP DEFAULT Now(),
-                    Open BOOL DEFAULT True,
-                    Remarks TEXT,
-                    ip_addr INET,
-                    hostname TEXT)'''
-                )
-        cur.close()
-        con.commit()
+    cur.execute('''CREATE TABLE IF NOT EXISTS responses 
+                (id SERIAL PRIMARY KEY, 
+                Name TEXT,
+                Clinic TEXT, 
+                Issue TEXT,
+                EntryDate TIMESTAMP DEFAULT Now(),
+                Open BOOL DEFAULT True,
+                Remarks TEXT,
+                ip_addr INET,
+                hostname TEXT)'''
+            )
+    cur.close()
+    con.commit()
 
 #function to get hostname for better tracking
 def get_hostname(ip_address):
@@ -87,7 +78,9 @@ async def submit_form(request: Request, name: str = Form(...), clinic: str = For
     hostname = get_hostname(client_ip)
     con = psycopg2.connect(f'dbname = {CONFIG['credentials']['dbname']} user = {CONFIG['credentials']['username']} password = {CONFIG['credentials']['password']}')
     cur = con.cursor()
-    cur.execute("INSERT INTO responses (Name, Clinic, Issue, ip_addr, hostname) VALUES (%s, %s, %s, %s, %s)", (name.strip(), clinic.strip(), response.strip(), client_ip, hostname))    
+    SQL = "INSERT INTO responses (Name, Clinic, Issue, ip_addr, hostname) VALUES (%s, %s, %s, %s, %s);",
+    DATA = (name.strip(), clinic.strip(), response.strip(), client_ip, hostname)
+    cur.execute(SQL, DATA)  
     cur.execute("SELECT id FROM responses ORDER BY id DESC LIMIT 1")
     new_id = cur.fetchone()[0]
     cur.close()
